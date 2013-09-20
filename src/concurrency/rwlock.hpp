@@ -22,7 +22,11 @@ public:
                  rwlock_access_t access);
     ~rwlock_acq_t();
 
-    signal_t *rwlock_acq_signal();
+    // A signal that gets pulsed when read access is available.
+    signal_t *rwlock_read_signal();
+    // A signal that gets pulsed when write access is available (only applicable when
+    // `access` is `write`.)
+    signal_t *rwlock_write_signal();
 
     rwlock_access_t access() const { return access_; }
 
@@ -30,7 +34,10 @@ private:
     friend class rwlock_t;
     friend class intrusive_list_t<rwlock_acq_t>;
 
-    cond_t cond_;
+    // Pulsed for locks with write access.
+    cond_t write_cond_;
+    // Pulsed for locks with read or write access.
+    cond_t read_cond_;
     rwlock_t *lock_;
     rwlock_access_t access_;
 
